@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Equilibrium Explorer · Microeconomics II</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4efe4; --paper2:#efe8d8;
+    --ink:#23211c; --ink2:#4a463c; --faint:#8a8478;
+    --line:#d8cfba; --line2:#c8bda3;
+    --navy:#274060; --navy-soft:#3a5680;
+    --red:#c2451f; --red-soft:#d96a40;
+    --green:#3f6b46; --gold:#b5862b;
+    --card:#fbf8f0;
+    --shadow: 0 1px 0 rgba(0,0,0,.04), 0 14px 30px -22px rgba(35,33,28,.5);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Newsreader",Georgia,serif;
+    font-size:17px; line-height:1.5;
+    background-image:
+      linear-gradient(0deg, rgba(0,0,0,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+    background-size:26px 26px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:34px 22px 90px}
+  header.masthead{border-bottom:2.5px solid var(--ink);padding-bottom:14px;margin-bottom:6px}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--red);font-weight:700}
+  h1{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(30px,5.2vw,52px);line-height:1.02;margin:.18em 0 .12em;letter-spacing:-.012em}
+  .sub{color:var(--ink2);font-size:16px;font-style:italic;max-width:62ch}
+  .sub b{font-style:normal;color:var(--ink);font-weight:600}
+
+  .tabs{display:flex;gap:0;margin:26px 0 0;border-bottom:1.5px solid var(--line2)}
+  .tab{appearance:none;border:none;background:none;cursor:pointer;
+    font-family:"Fraunces",serif;font-size:19px;font-weight:500;color:var(--faint);
+    padding:12px 20px 13px;position:relative;letter-spacing:-.01em}
+  .tab .n{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--red);margin-right:8px;font-weight:700;vertical-align:1px}
+  .tab[aria-selected="true"]{color:var(--ink)}
+  .tab[aria-selected="true"]::after{content:"";position:absolute;left:14px;right:14px;bottom:-1.5px;height:3px;background:var(--red)}
+  .tab:hover{color:var(--ink2)}
+
+  .panel{display:none;animation:rise .4s ease both}
+  .panel.on{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:26px;margin-top:26px;align-items:start}
+  @media(max-width:840px){.layout{grid-template-columns:1fr}}
+
+  .controls{position:sticky;top:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow)}
+  .pad{padding:18px 18px}
+  .ctl-title{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--navy);font-weight:700;margin:0 0 4px}
+  .ctl-sub{font-size:13.5px;color:var(--ink2);font-style:italic;margin:0 0 14px}
+
+  .slider-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
+  .slider-row label{font-size:15px}
+  .slider-row .val{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--red);font-size:16px}
+  input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--line2);border-radius:3px;outline:none;margin:10px 0 4px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--red);cursor:pointer;border:3px solid var(--paper);box-shadow:0 0 0 1px var(--red)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--red);cursor:pointer;border:3px solid var(--paper)}
+  .range-ends{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint)}
+
+  .matrix{margin-top:18px;border-top:1px dashed var(--line2);padding-top:14px}
+  .matrix h4{margin:0 0 8px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2)}
+  table.pay{border-collapse:collapse;width:100%;font-family:"JetBrains Mono",monospace;font-size:13px}
+  table.pay th{font-weight:500;color:var(--ink2);font-size:11px;padding:3px 4px;text-align:center;letter-spacing:.04em}
+  table.pay td{padding:2px 3px;text-align:center}
+  table.pay td.rh{text-align:left;color:var(--navy);font-weight:700;white-space:nowrap;padding-right:6px}
+  .pin{width:46px;background:var(--paper);border:1px solid var(--line2);border-radius:2px;font-family:"JetBrains Mono",monospace;font-size:13px;text-align:center;padding:4px 2px;color:var(--ink)}
+  .pin:focus{border-color:var(--red);outline:none}
+  .reset{margin-top:14px;appearance:none;background:none;border:1px solid var(--line2);color:var(--ink2);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:7px 12px;border-radius:2px;cursor:pointer}
+  .reset:hover{border-color:var(--red);color:var(--red)}
+
+  /* results */
+  .results h2{font-family:"Fraunces",serif;font-weight:600;font-size:24px;margin:0 0 2px;letter-spacing:-.01em}
+  .results .lede{color:var(--ink2);font-size:15px;margin:0 0 16px}
+  .results .lede b{color:var(--ink)}
+
+  .eqset{position:relative;background:var(--card);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);padding:22px 24px 24px;margin-bottom:22px}
+  .eqset > .tag{position:absolute;top:-11px;left:18px;background:var(--ink);color:var(--paper);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:3px 10px;border-radius:2px}
+  .answer-line{font-family:"Fraunces",serif;font-size:17px;color:var(--ink2);margin:0 0 14px;font-style:italic}
+
+  .eq{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--line)}
+  .eq:first-of-type{border-top:none}
+  .eq .dot{flex:0 0 auto;margin-top:5px;width:11px;height:11px;border-radius:50%;border:2px solid}
+  .eq.trade .dot{background:var(--green);border-color:var(--green)}
+  .eq.notrade .dot{background:transparent;border-color:var(--navy)}
+  .eq.mix .dot{background:var(--gold);border-color:var(--gold)}
+  .eq.deter .dot{background:transparent;border-color:var(--red)}
+  .eq .body{flex:1}
+  .eq .name{font-family:"Fraunces",serif;font-weight:600;font-size:18px;line-height:1.2}
+  .eq .name small{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.04em;margin-left:8px;text-transform:uppercase}
+  .eq .desc{font-size:14.5px;color:var(--ink2);margin-top:3px}
+  .eq .strat{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink);background:var(--paper2);border:1px solid var(--line2);border-radius:2px;padding:7px 10px;margin-top:8px;line-height:1.7}
+  .eq .strat b{color:var(--navy)}
+  .chip{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:11px;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:1px}
+  .chip.warn{background:#f6e3d8;color:var(--red);border:1px solid var(--red-soft)}
+  .none{font-style:italic;color:var(--faint);padding:8px 0}
+
+  /* the hand-drawn circle around the headline result */
+  .circled{position:relative;display:inline-block;padding:2px 12px 4px}
+  .circled svg{position:absolute;inset:-9px -6px;width:calc(100% + 12px);height:calc(100% + 18px);overflow:visible;pointer-events:none}
+  .circled .txt{position:relative;font-family:"Fraunces",serif;font-weight:600;font-size:18px}
+
+  .viz{margin-top:6px}
+  .viz h3{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);margin:22px 0 6px}
+  .viz .cap{font-size:13px;color:var(--faint);font-style:italic;margin:2px 0 0}
+  svg.plot{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:3px}
+
+  details.more{margin-top:14px;border-top:1px dashed var(--line2);padding-top:10px}
+  details.more summary{cursor:pointer;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700}
+  details.more summary:hover{color:var(--red)}
+  table.full{width:100%;border-collapse:collapse;margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:12px}
+  table.full th{text-align:left;color:var(--ink2);font-weight:500;border-bottom:1px solid var(--line2);padding:5px 6px;font-size:11px}
+  table.full td{padding:5px 6px;border-bottom:1px solid var(--line)}
+  table.full tr.ne td{background:#eef2e9}
+  table.full tr.und td{font-weight:700}
+  .mark{color:var(--green);font-weight:700}
+  .strike{color:var(--faint)}
+
+  .note{font-size:13.5px;color:var(--ink2);background:var(--paper2);border-left:3px solid var(--gold);padding:11px 14px;border-radius:2px;margin-top:16px;line-height:1.55}
+  .note b{color:var(--ink)}
+  footer{margin-top:50px;border-top:1px solid var(--line2);padding-top:14px;font-size:12.5px;color:var(--faint);font-style:italic}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:4px 0 0;font-size:12px;color:var(--ink2)}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:11px}
+  .legend i{width:10px;height:10px;border-radius:50%;display:inline-block;border:2px solid}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">Microeconomics II · Spring 2026 · Midterm</div>
+    <h1>Equilibrium Explorer</h1>
+    <p class="sub">An interactive companion to the two exam games. Move the sliders or edit the payoffs and watch the <b>equilibrium set</b> recompute. Everything is solved exactly from the inputs — no values are hard-coded.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tab1" role="tab" aria-selected="true" onclick="showTab(1)"><span class="n">Q1</span>The Trading Game</button>
+    <button class="tab" id="tab2" role="tab" aria-selected="false" onclick="showTab(2)"><span class="n">Q2</span>The War Game</button>
+  </div>
+
+  <!-- ================= QUESTION 1 ================= -->
+  <section class="panel on" id="panel1">
+    <div class="layout">
+      <aside class="controls">
+        <div class="card pad">
+          <p class="ctl-title">Inputs</p>
+          <p class="ctl-sub">Nature draws ω₁, ω₂, ω₃ with probabilities p, p, 1−2p. P1 knows only whether ω₁ occurred; P2 knows only whether ω₂ occurred.</p>
+          <div class="slider-row"><label>State probability&nbsp;<i>p</i></label><span class="val" id="pVal">0.20</span></div>
+          <input type="range" id="pSlide" min="0.01" max="0.49" step="0.01" value="0.20">
+          <div class="range-ends"><span>0</span><span>p ∈ (0, ½)</span><span>0.5</span></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink2);margin-top:8px">
+            Pr = ( <b id="prW1">.20</b>, <b id="prW2">.20</b>, <b id="prW3">.60</b> )
+          </div>
+
+          <div class="matrix">
+            <h4>Payoffs if both Trade</h4>
+            <table class="pay">
+              <tr><th></th><th>Player 1</th><th>Player 2</th></tr>
+              <tr><td class="rh">state ω₁</td><td><input class="pin" id="u1_0" value="1"></td><td><input class="pin" id="u2_0" value="-2"></td></tr>
+              <tr><td class="rh">state ω₂</td><td><input class="pin" id="u1_1" value="-2"></td><td><input class="pin" id="u2_1" value="1"></td></tr>
+              <tr><td class="rh">state ω₃</td><td><input class="pin" id="u1_2" value="4"></td><td><input class="pin" id="u2_2" value="4"></td></tr>
+            </table>
+            <div style="font-size:12px;color:var(--faint);font-style:italic;margin-top:7px">If either player picks “not trade”, both get 0.</div>
+          </div>
+          <button class="reset" onclick="resetQ1()">↺ Reset to exam values</button>
+        </div>
+      </aside>
+
+      <main class="results">
+        <h2>Pure-strategy equilibria, undominated</h2>
+        <p class="lede">Equilibria that do <b>not</b> use a weakly dominated strategy. A strategy is written
+          <code style="font-family:'JetBrains Mono',monospace;font-size:13px">(action at informed node, action at pooled node)</code>.</p>
+
+        <div class="eqset">
+          <span class="tag">The set</span>
+          <p class="answer-line">The set of pure-strategy Nash equilibria that do not involve weakly dominated strategies is</p>
+          <div id="q1eqs"></div>
+          <div style="margin-top:16px" id="q1circle"></div>
+        </div>
+
+        <div class="viz">
+          <h3>Regimes across p ∈ (0, ½)</h3>
+          <svg class="plot" id="q1line" viewBox="0 0 700 92" preserveAspectRatio="xMidYMid meet"></svg>
+          <p class="cap" id="q1lineCap"></p>
+        </div>
+
+        <details class="more">
+          <summary>Show all 16 strategy profiles &amp; the dominance check</summary>
+          <div id="q1full"></div>
+        </details>
+
+        <div class="note" id="q1note"></div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ================= QUESTION 2 ================= -->
+  <section class="panel" id="panel2">
+    <div class="layout">
+      <aside class="controls">
+        <div class="card pad">
+          <p class="ctl-title">Inputs</p>
+          <p class="ctl-sub">Nature makes A strong or weak (only A sees it). A attacks or not; if A attacks, B — not seeing the type — picks Retaliate, Yield, or Destroy. “Not attack” pays (0, 10).</p>
+          <div class="slider-row"><label>Prior&nbsp;<i>q</i> = Pr(A strong)</label><span class="val" id="qVal">0.50</span></div>
+          <input type="range" id="qSlide" min="0.02" max="0.98" step="0.01" value="0.50">
+          <div class="range-ends"><span>0</span><span>all weak ↔ all strong</span><span>1</span></div>
+
+          <div class="matrix">
+            <h4>Payoffs if A attacks &nbsp;(A first, then B)</h4>
+            <table class="pay">
+              <tr><th></th><th>A strong</th><th>A weak</th></tr>
+              <tr><td class="rh">Retaliate</td>
+                <td><input class="pin" id="aR_s" value="6"><input class="pin" id="bR_s" value="-6"></td>
+                <td><input class="pin" id="aR_w" value="-6"><input class="pin" id="bR_w" value="10"></td></tr>
+              <tr><td class="rh">Yield</td>
+                <td><input class="pin" id="aY_s" value="10"><input class="pin" id="bY_s" value="0"></td>
+                <td><input class="pin" id="aY_w" value="10"><input class="pin" id="bY_w" value="0"></td></tr>
+              <tr><td class="rh">Destroy</td>
+                <td><input class="pin" id="aD_s" value="-100"><input class="pin" id="bD_s" value="-100"></td>
+                <td><input class="pin" id="aD_w" value="-100"><input class="pin" id="bD_w" value="-100"></td></tr>
+            </table>
+            <div style="font-size:12px;color:var(--faint);font-style:italic;margin-top:7px">Each cell holds A’s payoff then B’s payoff.</div>
+          </div>
+          <button class="reset" onclick="resetQ2()">↺ Reset to exam values</button>
+        </div>
+      </aside>
+
+      <main class="results">
+        <h2>The set of Nash equilibria</h2>
+        <p class="lede">All Nash equilibria (pure is a special case of mixed). A’s strategy is a pair of attack probabilities; B’s is a distribution over Retaliate / Yield / Destroy at the attack node.</p>
+
+        <div class="eqset">
+          <span class="tag">The set</span>
+          <div id="q2eqs"></div>
+        </div>
+
+        <div class="viz">
+          <h3>B’s best reply vs. its belief μ = Pr(strong | attack)</h3>
+          <svg class="plot" id="q2env" viewBox="0 0 700 230" preserveAspectRatio="xMidYMid meet"></svg>
+          <p class="cap" id="q2envCap"></p>
+
+          <h3>How the equilibrium attack rate moves with the prior q</h3>
+          <svg class="plot" id="q2curve" viewBox="0 0 700 240" preserveAspectRatio="xMidYMid meet"></svg>
+          <p class="cap">Probability the <i>weak</i> type attacks in the semi-separating equilibrium, as q varies. Marker = current q.</p>
+        </div>
+
+        <div class="note" id="q2note"></div>
+      </main>
+    </div>
+  </section>
+
+  <footer>
+    Built as a study aid for the Spring 2026 Microeconomics II midterm. Equilibria are computed live from the payoff inputs:
+    Q1 enumerates all 16 pure profiles with a weak-dominance filter; Q2 solves the signaling game over sender types and the receiver’s posterior.
+  </footer>
+</div>
+
+<script>
+/* =================== Q1 SOLVER =================== */
+const STRAT=['TT','TN','NT','NN'];
+function tradeStates(s1,s2){const a1=s1[0],a23=s1[1],b2=s2[0],b13=s2[1];
+  return [(a1==='T'&&b13==='T'),(a23==='T'&&b2==='T'),(a23==='T'&&b13==='T')];}
+function q1pay(s1,s2,p,U){const pr=[p,p,1-2*p],t=tradeStates(s1,s2);let A=0,B=0;
+  for(let i=0;i<3;i++){if(t[i]){A+=pr[i]*U.u1[i];B+=pr[i]*U.u2[i];}}return [A,B];}
+function q1solve(p,U){const e=1e-9;const d1=new Set(),d2=new Set();
+  for(const s of STRAT){for(const s2 of STRAT){if(s2===s)continue;let ge=true,st=false;
+    for(const o of STRAT){const a=q1pay(s2,o,p,U)[0],b=q1pay(s,o,p,U)[0];if(a<b-e){ge=false;break;}if(a>b+e)st=true;}
+    if(ge&&st){d1.add(s);break;}}}
+  for(const s of STRAT){for(const s2 of STRAT){if(s2===s)continue;let ge=true,st=false;
+    for(const o of STRAT){const a=q1pay(o,s2,p,U)[1],b=q1pay(o,s,p,U)[1];if(a<b-e){ge=false;break;}if(a>b+e)st=true;}
+    if(ge&&st){d2.add(s);break;}}}
+  const NE=[];
+  for(const s1 of STRAT)for(const s2 of STRAT){let b1=-1e9;for(const o of STRAT)b1=Math.max(b1,q1pay(o,s2,p,U)[0]);
+    let b2=-1e9;for(const o of STRAT)b2=Math.max(b2,q1pay(s1,o,p,U)[1]);const c=q1pay(s1,s2,p,U);
+    if(c[0]>=b1-e&&c[1]>=b2-e)NE.push({s1,s2,pay:c});}
+  return{NE,undom:NE.filter(x=>!d1.has(x.s1)&&!d2.has(x.s2)),d1:[...d1],d2:[...d2]};}
+
+/* classify a Q1 equilibrium outcome */
+function q1outcome(eq){const t=tradeStates(eq.s1,eq.s2);const any=t[0]||t[1]||t[2];const all=t[0]&&t[1]&&t[2];
+  if(all)return{cls:'trade',name:'Trade always',desc:'Both players trade in every state.'};
+  if(!any)return{cls:'notrade',name:'No trade',desc:'Trade never executes in any state.'};
+  return{cls:'mix',name:'Partial trade',desc:'Trade occurs only in states: '+['ω₁','ω₂','ω₃'].filter((_,i)=>t[i]).join(', ')+'.'};}
+function decode(s,who){ // human readable
+  if(who===1)return `trade-when-ω₁? <b>${s[0]==='T'?'yes':'no'}</b>, trade-when-{ω₂,ω₃}? <b>${s[1]==='T'?'yes':'no'}</b>`;
+  return `trade-when-ω₂? <b>${s[0]==='T'?'yes':'no'}</b>, trade-when-{ω₁,ω₃}? <b>${s[1]==='T'?'yes':'no'}</b>`;}
+
+function readQ1U(){return{u1:[+v('u1_0'),+v('u1_1'),+v('u1_2')],u2:[+v('u2_0'),+v('u2_1'),+v('u2_2')]};}
+function v(id){return document.getElementById(id).value;}
+
+function renderQ1(){
+  const p=+document.getElementById('pSlide').value;
+  document.getElementById('pVal').textContent=p.toFixed(2);
+  document.getElementById('prW1').textContent=p.toFixed(2).slice(1);
+  document.getElementById('prW2').textContent=p.toFixed(2).slice(1);
+  document.getElementById('prW3').textContent=(1-2*p).toFixed(2).slice(0,4);
+  const U=readQ1U();const R=q1solve(p,U);
+
+  // equilibrium cards
+  const host=document.getElementById('q1eqs');host.innerHTML='';
+  if(R.undom.length===0){host.innerHTML='<div class="none">No pure equilibrium in undominated strategies for these inputs.</div>';}
+  R.undom.forEach(eq=>{const o=q1outcome(eq);const div=document.createElement('div');div.className='eq '+o.cls;
+    div.innerHTML=`<span class="dot"></span><div class="body">
+      <div class="name">${o.name} <small>payoff (${fmt(eq.pay[0])}, ${fmt(eq.pay[1])})</small></div>
+      <div class="desc">${o.desc}</div>
+      <div class="strat">P1 = (${eq.s1[0]}, ${eq.s1[1]}) — ${decode(eq.s1,1)}<br>P2 = (${eq.s2[0]}, ${eq.s2[1]}) — ${decode(eq.s2,2)}</div>
+    </div>`;host.appendChild(div);});
+
+  // circled headline
+  const labels=R.undom.map(eq=>q1outcome(eq).name);
+  const headline = labels.length? '{ '+labels.join('  ,  ')+' }' : '∅';
+  document.getElementById('q1circle').innerHTML=circle(headline);
+
+  // number line regimes
+  drawQ1Line(U,p);
+
+  // full table
+  buildQ1Full(R,p,U);
+
+  // note
+  const tradeIn=R.undom.some(e=>q1outcome(e).cls==='trade');
+  document.getElementById('q1note').innerHTML = tradeIn
+    ? `<b>Reading it:</b> with these payoffs the “trade always” profile is still a best response — at the pooled node the expected gain from ω₃ outweighs the loss in the bad state. The weak-dominance filter quietly removes the redundant no-trade profiles in which a player refuses at the node where they <i>know</i> they gain; the surviving no-trade equilibrium has each player willing to trade at that informed node.`
+    : `<b>Reading it:</b> the “trade always” profile has stopped being a best response — at the pooled node a player now strictly prefers to refuse, since the bad state is too likely. Only the no-trade equilibrium remains. Note this is a failure of <i>best response</i>, not weak dominance: trading-everywhere is never weakly dominated (against a partner who refuses at their own informed node it is pure upside).`;
+}
+
+function fmt(x){const r=Math.round(x*1000)/1000;return Number.isInteger(r)?r.toString():r.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');}
+
+function drawQ1Line(U,pcur){
+  const s=document.getElementById('q1line');const W=700,H=92,L=40,Rr=660,y=46;
+  let segs=[];const N=480;let prev=null,start=0;
+  for(let i=0;i<=N;i++){const p=0.001+(0.499-0.001)*i/N;const und=q1solve(p,U).undom;
+    const trade=und.some(e=>q1outcome(e).cls==='trade');const key=trade?'both':'one';
+    if(prev===null){prev=key;start=p;}
+    else if(key!==prev){segs.push({a:start,b:p,k:prev});prev=key;start=p;}}
+  segs.push({a:start,b:0.499,k:prev});
+  const X=p=>L+(Rr-L)*(p-0)/0.5;
+  let svg=`<rect x="0" y="0" width="${W}" height="${H}" fill="none"/>`;
+  segs.forEach(g=>{const col=g.k==='both'?'#3f6b46':'#274060';
+    svg+=`<rect x="${X(g.a)}" y="${y-9}" width="${X(g.b)-X(g.a)}" height="18" fill="${col}" opacity="${g.k==='both'?0.85:0.62}"/>`;});
+  // ticks
+  for(let t=0;t<=0.5+1e-9;t+=0.1){svg+=`<line x1="${X(t)}" y1="${y+12}" x2="${X(t)}" y2="${y+17}" stroke="#8a8478" stroke-width="1"/>
+    <text x="${X(t)}" y="${y+30}" font-family="JetBrains Mono" font-size="10" fill="#8a8478" text-anchor="middle">${t.toFixed(1)}</text>`;}
+  // boundary markers between segments
+  segs.slice(0,-1).forEach(g=>{svg+=`<line x1="${X(g.b)}" y1="${y-14}" x2="${X(g.b)}" y2="${y+12}" stroke="#c2451f" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="${X(g.b)}" y="${y-19}" font-family="JetBrains Mono" font-size="10" fill="#c2451f" text-anchor="middle">p* = ${g.b.toFixed(3).replace(/0+$/,'').replace(/\.$/,'')}</text>`;});
+  // current p marker
+  svg+=`<polygon points="${X(pcur)-5},${y+12} ${X(pcur)+5},${y+12} ${X(pcur)},${y+4}" fill="#23211c"/>
+    <line x1="${X(pcur)}" y1="${y-9}" x2="${X(pcur)}" y2="${y+9}" stroke="#23211c" stroke-width="2"/>`;
+  s.innerHTML=svg;
+  document.getElementById('q1lineCap').innerHTML=
+    `<span class="legend"><span><i style="background:#3f6b46;border-color:#3f6b46"></i> trade-always + no-trade</span>
+     <span><i style="background:#274060;border-color:#274060"></i> no-trade only</span>
+     <span>▲ current p</span></span>`;
+}
+
+function buildQ1Full(R,p,U){
+  const neSet=new Set(R.NE.map(e=>e.s1+'|'+e.s2));
+  let rows='';
+  for(const s1 of STRAT)for(const s2 of STRAT){const c=q1pay(s1,s2,p,U);
+    const isNE=neSet.has(s1+'|'+s2);const ud=!R.d1.includes(s1)&&!R.d2.includes(s2);
+    rows+=`<tr class="${isNE?'ne':''} ${isNE&&ud?'und':''}">
+      <td>(${s1[0]},${s1[1]})${R.d1.includes(s1)?' <span class="strike">wd</span>':''}</td>
+      <td>(${s2[0]},${s2[1]})${R.d2.includes(s2)?' <span class="strike">wd</span>':''}</td>
+      <td>(${fmt(c[0])}, ${fmt(c[1])})</td>
+      <td>${isNE?(ud?'<span class="mark">NE ✓ (kept)</span>':'NE (dominated)'):'—'}</td></tr>`;}
+  document.getElementById('q1full').innerHTML=
+    `<table class="full"><tr><th>P1 strat</th><th>P2 strat</th><th>payoff</th><th>status</th></tr>${rows}</table>
+     <div style="font-size:12px;color:#8a8478;font-style:italic;margin-top:8px"><b>wd</b> = weakly dominated strategy. Dominated for P1: ${R.d1.join(', ')||'none'}. Dominated for P2: ${R.d2.join(', ')||'none'}.</div>`;
+}
+
+/* =================== Q2 SOLVER =================== */
+function q2read(){
+  return {q:+document.getElementById('qSlide').value, nA:0,
+    a:{R:{s:+v('aR_s'),w:+v('aR_w')},Y:{s:+v('aY_s'),w:+v('aY_w')},D:{s:+v('aD_s'),w:+v('aD_w')}},
+    b:{R:{s:+v('bR_s'),w:+v('bR_w')},Y:{s:+v('bY_s'),w:+v('bY_w')},D:{s:+v('bD_s'),w:+v('bD_w')}}};
+}
+function q2solve(inp){
+  const e=1e-7;const{q,nA,a,b}=inp;const acts=['R','Y','D'];
+  const aMix=(t,w)=>w.R*a.R[t]+w.Y*a.Y[t]+w.D*a.D[t];
+  const bVal=(k,mu)=>mu*b[k].s+(1-mu)*b[k].w;
+  const BR=mu=>{let m=-1e9;for(const k of acts)m=Math.max(m,bVal(k,mu));return acts.filter(k=>bVal(k,mu)>=m-e);};
+  const pure=k=>({R:k==='R'?1:0,Y:k==='Y'?1:0,D:k==='D'?1:0});
+  const wdom=k=>{for(const k2 of acts){if(k2===k)continue;
+    if(b[k2].s>=b[k].s-e&&b[k2].w>=b[k].w-e&&(b[k2].s>b[k].s+e||b[k2].w>b[k].w+e))return k2;}return null;};
+  const eqs=[];
+  // (A) no-attack pooling
+  let deter=acts.filter(k=>a[k].s<=nA+e&&a[k].w<=nA+e);let mixD=false;
+  if(deter.length===0){for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)for(let t=0;t<=1.0001;t+=0.02){
+    const w={R:0,Y:0,D:0};w[acts[i]]=t;w[acts[j]]=1-t;if(aMix('s',w)<=nA+e&&aMix('w',w)<=nA+e)mixD=true;}}
+  if(deter.length||mixD)eqs.push({kind:'no-attack',deter,mixD,dom:deter.map(k=>({act:k,by:wdom(k)}))});
+  function crossings(){const out=[];for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const k1=acts[i],k2=acts[j];
+    const den=(b[k1].s-b[k1].w)-(b[k2].s-b[k2].w);if(Math.abs(den)<e)continue;
+    const mu=(b[k2].w-b[k1].w)/den;if(mu<=e||mu>=1-e)continue;const top=BR(mu);
+    if(top.includes(k1)&&top.includes(k2))out.push({mu,k1,k2});}return out;}
+  // (B) pool-attack
+  {const mu=q,br=BR(mu);let f=null;
+   if(br.length===1){const w=pure(br[0]);if(aMix('s',w)>=nA-e&&aMix('w',w)>=nA-e)f=w;}
+   else for(let t=0;t<=1.0001;t+=0.005){const w={R:0,Y:0,D:0};w[br[0]]=t;w[br[1]]=1-t;
+     if(aMix('s',w)>=nA-e&&aMix('w',w)>=nA-e){f=w;break;}}
+   if(f)eqs.push({kind:'pool-attack',sigS:1,sigW:1,mu,B:f});}
+  // (C) sep strong only
+  {for(const k of BR(1)){const w=pure(k);if(aMix('s',w)>=nA-e&&aMix('w',w)<=nA+e){eqs.push({kind:'sep-strong',sigS:1,sigW:0,mu:1,B:w});break;}}}
+  // (D) sep weak only
+  {for(const k of BR(0)){const w=pure(k);if(aMix('w',w)>=nA-e&&aMix('s',w)<=nA+e){eqs.push({kind:'sep-weak',sigS:0,sigW:1,mu:0,B:w});break;}}}
+  // (E) strong pure, weak mixes
+  for(const c of crossings()){const sW=q*(1-c.mu)/((1-q)*c.mu);if(sW<=e||sW>=1-e)continue;
+    const den=a[c.k1].w-a[c.k2].w;if(Math.abs(den)<e)continue;const al=(nA-a[c.k2].w)/den;if(al<-e||al>1+e)continue;
+    const w={R:0,Y:0,D:0};w[c.k1]=al;w[c.k2]=1-al;if(aMix('s',w)<nA-e)continue;
+    eqs.push({kind:'semisep-w',sigS:1,sigW:sW,mu:c.mu,B:w});}
+  // (F) weak pure, strong mixes
+  for(const c of crossings()){const sS=(1-q)*c.mu/(q*(1-c.mu));if(sS<=e||sS>=1-e)continue;
+    const den=a[c.k1].s-a[c.k2].s;if(Math.abs(den)<e)continue;const al=(nA-a[c.k2].s)/den;if(al<-e||al>1+e)continue;
+    const w={R:0,Y:0,D:0};w[c.k1]=al;w[c.k2]=1-al;if(aMix('w',w)<nA-e)continue;
+    eqs.push({kind:'semisep-s',sigS:sS,sigW:1,mu:c.mu,B:w});}
+  return eqs;
+}
+function frac(x){ // pretty fraction for nice values
+  const cands=[[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,8],[3,8],[5,8],[7,8],[1,11],[1,1],[0,1]];
+  for(const[n,d] of cands)if(Math.abs(x-n/d)<1e-3)return d===1?`${n}`:`${n}⁄${d}`;
+  return x.toFixed(3).replace(/0+$/,'').replace(/\.$/,'');}
+function Bmix(w){const parts=[];if(w.R>1e-6)parts.push(`R ${frac(w.R)}`);if(w.Y>1e-6)parts.push(`Y ${frac(w.Y)}`);if(w.D>1e-6)parts.push(`D ${frac(w.D)}`);return parts.join(' · ');}
+
+function renderQ2(){
+  const inp=q2read();document.getElementById('qVal').textContent=inp.q.toFixed(2);
+  const eqs=q2solve(inp);const host=document.getElementById('q2eqs');host.innerHTML='';
+  if(!eqs.length){host.innerHTML='<div class="none">No Nash equilibrium found for these inputs.</div>';}
+
+  eqs.forEach(eq=>{const div=document.createElement('div');
+    if(eq.kind==='no-attack'){
+      const credibleNote = eq.dom.every(d=>d.by) ? `<span class="chip warn">non-credible threat</span>` : '';
+      div.className='eq deter';
+      div.innerHTML=`<span class="dot"></span><div class="body">
+        <div class="name">No attack ${credibleNote}<small>continuum</small></div>
+        <div class="desc">Neither type attacks. The attack node is off the path, so B is free to plan a deterrent there.</div>
+        <div class="strat">A = (<b>not attack</b> if strong, <b>not attack</b> if weak)<br>
+          B = any reply with enough weight on a punishing action to make even the <b>strong</b> type prefer (0). Simplest: B plays <b>${eq.deter[0]||'Destroy'}</b> for sure.</div>
+        ${eq.dom.some(d=>d.by)?`<div class="desc" style="margin-top:6px;color:#c2451f">Relies on the weakly dominated threat “${eq.deter.join(', ')}” (dominated by ${eq.dom.map(d=>d.by).filter(Boolean).join(', ')}). It survives as a <i>Nash</i> equilibrium but vanishes under sequential rationality / deletion of weakly dominated strategies.</div>`:''}
+      </div>`;
+    } else if(eq.kind==='pool-attack'){
+      div.className='eq trade';
+      div.innerHTML=`<span class="dot"></span><div class="body">
+        <div class="name">Pooling on attack <small>μ = ${frac(eq.mu)}</small></div>
+        <div class="desc">Both types attack; B yields/retaliates given posterior equal to the prior.</div>
+        <div class="strat">A = (attack if strong, attack if weak)<br>B = ${Bmix(eq.B)}</div></div>`;
+    } else if(eq.kind==='sep-strong'){
+      div.className='eq notrade';
+      div.innerHTML=`<span class="dot"></span><div class="body">
+        <div class="name">Separating <small>strong attacks only</small></div>
+        <div class="desc">The strong type attacks, the weak type stays home; B infers strength and best-replies.</div>
+        <div class="strat">A = (attack if strong, not attack if weak)<br>B = ${Bmix(eq.B)}</div></div>`;
+    } else if(eq.kind==='sep-weak'){
+      div.className='eq notrade';
+      div.innerHTML=`<span class="dot"></span><div class="body">
+        <div class="name">Separating <small>weak attacks only</small></div>
+        <div class="desc">Only the weak type attacks.</div>
+        <div class="strat">A = (not attack if strong, attack if weak)<br>B = ${Bmix(eq.B)}</div></div>`;
+    } else { // semisep
+      const who=eq.kind==='semisep-w'?'weak':'strong';
+      div.className='eq mix';
+      div.innerHTML=`<span class="dot"></span><div class="body">
+        <div class="name">Semi-separating <small>B indifferent at μ = ${frac(eq.mu)}</small></div>
+        <div class="desc">The ${who} type mixes so that B is exactly indifferent; B mixes so the ${who} type is exactly indifferent.</div>
+        <div class="strat">A: strong attacks w.p. <b>${frac(eq.sigS)}</b>, weak attacks w.p. <b>${frac(eq.sigW)}</b><br>B = ${Bmix(eq.B)}</div></div>`;
+    }
+    host.appendChild(div);
+  });
+
+  drawEnvelope(inp);
+  drawCurve(inp);
+
+  // note
+  const hasDeter=eqs.some(e=>e.kind==='no-attack'&&e.dom.some(d=>d.by));
+  document.getElementById('q2note').innerHTML =
+    `<b>Two layers of answer.</b> The <i>semi-separating</i> equilibrium is the unique one that survives sequential rationality (and deletion of B’s weakly dominated “Destroy” threat) — it is the answer most courses ultimately want. ${hasDeter?`The <i>no-attack</i> family is also a genuine Nash equilibrium, but only because Nash lets B threaten a move it would never actually carry out. Because Question 2 (unlike Question 1) does <b>not</b> restrict to undominated strategies, the literal “set of Nash equilibria” includes it.`:''}`;
+}
+
+function drawEnvelope(inp){
+  const{q,a,b}=inp;const acts=['R','Y','D'];const colors={R:'#c2451f',Y:'#274060',D:'#7a6a4f'};
+  const bVal=(k,mu)=>mu*b[k].s+(1-mu)*b[k].w;
+  const W=700,H=230,L=52,Rr=672,T=18,Bm=44;
+  const xs=mu=>L+(Rr-L)*mu;
+  let lo=1e9,hi=-1e9;acts.forEach(k=>{lo=Math.min(lo,b[k].s,b[k].w);hi=Math.max(hi,b[k].s,b[k].w);});
+  if(hi===lo)hi=lo+1;const pad=(hi-lo)*0.12;lo-=pad;hi+=pad;
+  const ys=val=>T+(H-T-Bm)*(1-(val-lo)/(hi-lo));
+  let svg='';
+  // axes
+  svg+=`<line x1="${L}" y1="${ys(0)}" x2="${Rr}" y2="${ys(0)}" stroke="#cabfa4" stroke-width="1" stroke-dasharray="2 3"/>`;
+  svg+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${H-Bm}" stroke="#8a8478" stroke-width="1"/>`;
+  svg+=`<line x1="${L}" y1="${H-Bm}" x2="${Rr}" y2="${H-Bm}" stroke="#8a8478" stroke-width="1"/>`;
+  for(let t=0;t<=1.0001;t+=0.25)svg+=`<text x="${xs(t)}" y="${H-Bm+16}" font-family="JetBrains Mono" font-size="10" fill="#8a8478" text-anchor="middle">${t}</text>`;
+  svg+=`<text x="${(L+Rr)/2}" y="${H-8}" font-family="JetBrains Mono" font-size="10" fill="#4a463c" text-anchor="middle">belief μ = Pr(strong | attack)</text>`;
+  svg+=`<text x="${L-8}" y="${ys(0)}" font-family="JetBrains Mono" font-size="10" fill="#8a8478" text-anchor="end">0</text>`;
+  // lines for each B action
+  acts.forEach(k=>{const y0=ys(b[k].w),y1=ys(b[k].s);
+    svg+=`<line x1="${xs(0)}" y1="${y0}" x2="${xs(1)}" y2="${y1}" stroke="${colors[k]}" stroke-width="2" opacity="0.85"/>
+      <text x="${xs(1)+4}" y="${y1+4}" font-family="JetBrains Mono" font-size="11" fill="${colors[k]}" font-weight="700">${k}</text>`;});
+  // upper envelope highlight (sample)
+  let bestPath='';for(let i=0;i<=200;i++){const mu=i/200;let bk=acts[0],bv=-1e9;acts.forEach(k=>{const val=bVal(k,mu);if(val>bv){bv=val;bk=k;}});
+    bestPath+=`${i?'L':'M'}${xs(mu).toFixed(1)} ${ys(bv).toFixed(1)} `;}
+  svg+=`<path d="${bestPath}" fill="none" stroke="#23211c" stroke-width="3.5" opacity="0.13"/>`;
+  // crossing belief(s) μ*
+  const cr=[];for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const k1=acts[i],k2=acts[j];
+    const den=(b[k1].s-b[k1].w)-(b[k2].s-b[k2].w);if(Math.abs(den)<1e-9)continue;const mu=(b[k2].w-b[k1].w)/den;
+    if(mu<=0||mu>=1)continue;let bv=-1e9;acts.forEach(k=>bv=Math.max(bv,bVal(k,mu)));
+    if(Math.abs(bVal(k1,mu)-bv)<1e-6)cr.push(mu);}
+  cr.forEach(mu=>{svg+=`<line x1="${xs(mu)}" y1="${T}" x2="${xs(mu)}" y2="${H-Bm}" stroke="#b5862b" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <text x="${xs(mu)}" y="${T-4}" font-family="JetBrains Mono" font-size="10" fill="#b5862b" text-anchor="middle">μ*=${frac(mu)}</text>`;});
+  // current prior q and posterior in eq if applicable
+  svg+=`<line x1="${xs(q)}" y1="${T}" x2="${xs(q)}" y2="${H-Bm}" stroke="#23211c" stroke-width="1" opacity="0.35"/>
+    <text x="${xs(q)}" y="${H-Bm+30}" font-family="JetBrains Mono" font-size="10" fill="#23211c" text-anchor="middle">q=${q.toFixed(2)}</text>`;
+  document.getElementById('q2env').innerHTML=svg;
+  document.getElementById('q2envCap').innerHTML=
+    `The thick grey path is B’s best reply. Where two lines cross on top (μ*), B is willing to mix — that belief pins the semi-separating equilibrium.`;
+}
+
+function drawCurve(inp){
+  const W=700,H=240,L=52,Rr=684,T=16,Bm=42;
+  const xs=q=>L+(Rr-L)*q, ys=s=>T+(H-T-Bm)*(1-s);
+  let svg='';
+  svg+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${H-Bm}" stroke="#8a8478" stroke-width="1"/>
+    <line x1="${L}" y1="${H-Bm}" x2="${Rr}" y2="${H-Bm}" stroke="#8a8478" stroke-width="1"/>`;
+  for(let t=0;t<=1.0001;t+=0.25){svg+=`<text x="${xs(t)}" y="${H-Bm+16}" font-family="JetBrains Mono" font-size="10" fill="#8a8478" text-anchor="middle">${t}</text>
+    <text x="${L-8}" y="${ys(t)+3}" font-family="JetBrains Mono" font-size="10" fill="#8a8478" text-anchor="end">${t}</text>
+    <line x1="${L}" y1="${ys(t)}" x2="${Rr}" y2="${ys(t)}" stroke="#e7ddc6" stroke-width="1"/>`;}
+  svg+=`<text x="${(L+Rr)/2}" y="${H-6}" font-family="JetBrains Mono" font-size="10" fill="#4a463c" text-anchor="middle">prior q = Pr(strong)</text>`;
+  // sample sigW(q) from solver
+  let path='',pts=[];for(let i=0;i<=240;i++){const q=0.001+0.998*i/240;const eqs=q2solve({...inp,q});
+    const sm=eqs.find(e=>e.kind==='semisep-w');const pa=eqs.find(e=>e.kind==='pool-attack');
+    let val=null;if(sm)val=sm.sigW;else if(pa)val=1; // weak attacks w.p.1 in pooling
+    pts.push({q,val});}
+  // draw as piecewise; break when null
+  let started=false;pts.forEach(p=>{if(p.val===null){started=false;return;}
+    path+=`${started?'L':'M'}${xs(p.q).toFixed(1)} ${ys(Math.max(0,Math.min(1,p.val))).toFixed(1)} `;started=true;});
+  svg+=`<path d="${path}" fill="none" stroke="#b5862b" stroke-width="2.6"/>`;
+  // current marker
+  const cur=q2solve(inp);const sm=cur.find(e=>e.kind==='semisep-w');const pa=cur.find(e=>e.kind==='pool-attack');
+  let cv=sm?sm.sigW:(pa?1:null);
+  if(cv!==null){svg+=`<circle cx="${xs(inp.q)}" cy="${ys(Math.max(0,Math.min(1,cv)))}" r="5.5" fill="#c2451f" stroke="#f4efe4" stroke-width="2"/>
+    <text x="${xs(inp.q)}" y="${ys(Math.max(0,Math.min(1,cv)))-11}" font-family="JetBrains Mono" font-size="10.5" fill="#c2451f" text-anchor="middle" font-weight="700">σ_w=${frac(cv)}</text>`;}
+  document.getElementById('q2curve').innerHTML=svg;
+}
+
+/* hand-drawn circle around a headline */
+function circle(text){
+  return `<span class="circled"><span class="txt">${text}</span>
+    <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+      <path d="M6,22 C4,10 24,4 52,4 C82,4 97,12 95,22 C97,33 74,38 48,37 C20,38 8,33 7,23 C7,21 8,19 9,18"
+        fill="none" stroke="#c2451f" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    </svg></span>`;
+}
+
+/* tabs + wiring */
+function showTab(n){
+  document.getElementById('tab1').setAttribute('aria-selected',n===1);
+  document.getElementById('tab2').setAttribute('aria-selected',n===2);
+  document.getElementById('panel1').classList.toggle('on',n===1);
+  document.getElementById('panel2').classList.toggle('on',n===2);
+  if(n===2)renderQ2();
+}
+function resetQ1(){const d={u1_0:1,u1_1:-2,u1_2:4,u2_0:-2,u2_1:1,u2_2:4};
+  for(const k in d)document.getElementById(k).value=d[k];document.getElementById('pSlide').value=0.2;renderQ1();}
+function resetQ2(){const d={aR_s:6,bR_s:-6,aR_w:-6,bR_w:10,aY_s:10,bY_s:0,aY_w:10,bY_w:0,aD_s:-100,bD_s:-100,aD_w:-100,bD_w:-100};
+  for(const k in d)document.getElementById(k).value=d[k];document.getElementById('qSlide').value=0.5;renderQ2();}
+
+document.getElementById('pSlide').addEventListener('input',renderQ1);
+document.querySelectorAll('#panel1 .pin').forEach(el=>el.addEventListener('input',renderQ1));
+document.getElementById('qSlide').addEventListener('input',renderQ2);
+document.querySelectorAll('#panel2 .pin').forEach(el=>el.addEventListener('input',renderQ2));
+renderQ1();
+</script>
+</body>
+</html>
